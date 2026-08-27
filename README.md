@@ -1,4 +1,8 @@
-# TurboWarp/scratch-blocks
+# @blockdia/scratch-blocks
+
+Blockdia's Scratch Blocks package, based on the TurboWarp fork. npm releases include generated build artifacts, so consumers do not need the former `develop-builds` branch.
+
+The initial Blockdia `0.1.0` release is based on TurboWarp commit `7c58de666658df1bb447d010132aa3914c10f41e`.
 
 ## Playgrounds
 
