@@ -542,6 +542,10 @@ Blockly.BlockSvg.prototype.updateColour = function() {
     if (input.outlinePath) {
       input.outlinePath.setAttribute('fill', this.getColourTertiary());
     }
+    var inputBlock = input.connection && input.connection.targetBlock();
+    if (inputBlock && inputBlock.type === 'operator_boolean' && inputBlock.rendered) {
+      inputBlock.updateColour();
+    }
   }
 
   // Render icon(s) if applicable
@@ -631,6 +635,16 @@ Blockly.BlockSvg.prototype.getHeightWidth = function() {
  *   If true, also render block's parent, grandparent, etc.  Defaults to true.
  */
 Blockly.BlockSvg.prototype.render = function(opt_bubble) {
+  if (!this.isInsertionMarker()) {
+    for (var booleanIndex = 0, booleanInput;
+      booleanInput = this.inputList[booleanIndex]; booleanIndex++) {
+      if (booleanInput.connection && !booleanInput.connection.isConnected() &&
+          booleanInput.connection.getShadowDom() &&
+          booleanInput.connection.getOutputShape() === Blockly.OUTPUT_SHAPE_HEXAGONAL) {
+        booleanInput.connection.respawnShadow_();
+      }
+    }
+  }
   Blockly.Field.startCache();
   this.rendered = true;
 

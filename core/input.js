@@ -29,6 +29,7 @@ goog.provide('Blockly.Input');
 goog.require('Blockly.Connection');
 goog.require('Blockly.FieldLabel');
 goog.require('goog.asserts');
+goog.require('goog.dom');
 
 
 /**
@@ -215,6 +216,20 @@ Blockly.Input.prototype.setCheck = function(check) {
     throw 'This input does not have a connection.';
   }
   this.connection.setCheck(check);
+  if (check === 'Boolean' ||
+      (goog.isArray(check) && check.indexOf('Boolean') !== -1)) {
+    var workspace = this.sourceBlock_.workspace;
+    if (!workspace.isMutator && !this.sourceBlock_.isInsertionMarker() &&
+        this.sourceBlock_.type !== 'procedures_definition' &&
+        !this.connection.getShadowDom()) {
+      var shadow = goog.dom.createDom('shadow');
+      shadow.setAttribute('type', 'operator_boolean');
+      var field = goog.dom.createDom('field', null, 'FALSE');
+      field.setAttribute('name', 'VALUE');
+      shadow.appendChild(field);
+      this.connection.setShadowDom(shadow);
+    }
+  }
   return this;
 };
 
