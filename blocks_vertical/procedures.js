@@ -337,14 +337,18 @@ Blockly.ScratchBlocks.ProcedureUtils.addLabelEditor_ = function(text) {
 
 /**
  * Build a DOM node representing a shadow block of the given type.
- * @param {string} type One of 's' (string) or 'n' (number).
+ * @param {string} type One of 'b' (boolean), 's' (string) or 'n' (number).
  * @return {!Element} The DOM node representing the new shadow block.
  * @private
  * @this Blockly.Block
  */
 Blockly.ScratchBlocks.ProcedureUtils.buildShadowDom_ = function(type) {
   var shadowDom = goog.dom.createDom('shadow');
-  if (type == 'n') {
+  if (type == 'b') {
+    var shadowType = 'operator_boolean';
+    var fieldName = 'VALUE';
+    var fieldValue = 'FALSE';
+  } else if (type == 'n') {
     var shadowType = 'math_number';
     var fieldName = 'NUM';
     var fieldValue = '1';
@@ -370,12 +374,15 @@ Blockly.ScratchBlocks.ProcedureUtils.buildShadowDom_ = function(type) {
  */
 Blockly.ScratchBlocks.ProcedureUtils.attachShadow_ = function(input,
     argumentType) {
-  if (argumentType == 'n' || argumentType == 's') {
-    var blockType = argumentType == 'n' ? 'math_number' : 'text';
+  if (argumentType == 'b' || argumentType == 'n' || argumentType == 's') {
+    var blockType = argumentType == 'b' ? 'operator_boolean' :
+        (argumentType == 'n' ? 'math_number' : 'text');
     Blockly.Events.disable();
     try {
       var newBlock = this.workspace.newBlock(blockType);
-      if (argumentType == 'n') {
+      if (argumentType == 'b') {
+        newBlock.setFieldValue('FALSE', 'VALUE');
+      } else if (argumentType == 'n') {
         newBlock.setFieldValue('1', 'NUM');
       } else {
         newBlock.setFieldValue('', 'TEXT');
@@ -456,7 +463,7 @@ Blockly.ScratchBlocks.ProcedureUtils.populateArgumentOnCaller_ = function(type,
     // Reattach the old block and shadow DOM.
     connectionMap[input.name] = null;
     oldBlock.outputConnection.connect(input.connection);
-    if (type != 'b' && this.generateShadows_) {
+    if (this.generateShadows_) {
       var shadowDom = oldShadow || this.buildShadowDom_(type);
       console.log("setting shadow dom: " + shadowDom);
       input.connection.setShadowDom(shadowDom);

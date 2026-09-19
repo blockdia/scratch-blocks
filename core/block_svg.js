@@ -151,6 +151,16 @@ Blockly.BlockSvg.INLINE = -1;
 Blockly.BlockSvg.prototype.initSvg = function() {
   goog.asserts.assert(this.workspace.rendered, 'Workspace is headless.');
   if (!this.isInsertionMarker()) { // Insertion markers not allowed to have inputs or icons
+    // Materialize default boolean shadows after the parent block has finished
+    // defining all of its inputs. XML loading already supplies its own shadow.
+    for (var inputIndex = 0, booleanInput;
+      booleanInput = this.inputList[inputIndex]; inputIndex++) {
+      if (booleanInput.connection && !booleanInput.connection.isConnected() &&
+          booleanInput.connection.getShadowDom() &&
+          booleanInput.connection.getOutputShape() === Blockly.OUTPUT_SHAPE_HEXAGONAL) {
+        booleanInput.connection.respawnShadow_();
+      }
+    }
     // Input shapes are empty holes drawn when a value input is not connected.
     for (var i = 0, input; input = this.inputList[i]; i++) {
       input.init();
