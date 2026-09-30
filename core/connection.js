@@ -613,6 +613,8 @@ Blockly.Connection.prototype.disconnectInternal_ = function(parentBlock,
  * @protected
  */
 Blockly.Connection.prototype.respawnShadow_ = function() {
+  // Rendering during disconnect may already have restored this input.
+  if (this.isConnected()) return;
   var parentBlock = this.getSourceBlock();
   var shadow = this.getShadowDom();
   if (parentBlock.workspace && shadow && Blockly.Events.recordUndo) {

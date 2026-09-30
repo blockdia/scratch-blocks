@@ -84,3 +84,40 @@ function test_insertionMarkerDoesNotMaterializeBooleanShadow() {
   delete Blockly.Blocks['operator_boolean'];
   delete Blockly.Blocks['boolean_parent_for_marker_test'];
 }
+
+/* exported test_booleanShadowRespawnsOnlyOnce */
+function test_booleanShadowRespawnsOnlyOnce() {
+  booleanToggleTest_defineBooleanBlock();
+  Blockly.Blocks['boolean_parent_for_respawn_test'] = {
+    init: function() {
+      this.appendValueInput('CONDITION').setCheck('Boolean');
+    }
+  };
+  var workspace = Blockly.inject('blocklyDiv', {});
+  try {
+    var parent = workspace.newBlock('boolean_parent_for_respawn_test');
+    parent.initSvg();
+    parent.render(false);
+    var reporter = workspace.newBlock('operator_boolean');
+    reporter.initSvg();
+    reporter.render(false);
+    var connection = parent.getInput('CONDITION').connection;
+    for (var i = 0; i < 3; i++) {
+      connection.connect(reporter.outputConnection);
+      reporter.outputConnection.disconnect();
+      var shadow = connection.targetBlock();
+      assertNotNull(shadow);
+      var id = shadow.id;
+      connection.respawnShadow_();
+      assertEquals(id, connection.targetBlock().id);
+      assertEquals(3, workspace.getAllBlocks(false).length);
+      connection.connect(reporter.outputConnection);
+      connection.respawnShadow_();
+      assertEquals(reporter.id, connection.targetBlock().id);
+    }
+  } finally {
+    workspace.dispose();
+    delete Blockly.Blocks['operator_boolean'];
+    delete Blockly.Blocks['boolean_parent_for_respawn_test'];
+  }
+}
