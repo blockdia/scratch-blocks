@@ -340,6 +340,7 @@ Blockly.RenderedConnection.prototype.disconnectInternal_ = function(parentBlock,
  * @private
  */
 Blockly.RenderedConnection.prototype.respawnShadow_ = function() {
+  if (this.isConnected()) return;
   var parentBlock = this.getSourceBlock();
   // Respawn the shadow block if there is one.
   var shadow = this.getShadowDom();

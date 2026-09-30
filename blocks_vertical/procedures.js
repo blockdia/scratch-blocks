@@ -302,8 +302,26 @@ Blockly.ScratchBlocks.ProcedureUtils.deleteShadows_ = function(connectionMap) {
         if (block && block.isShadow()) {
           block.dispose();
           connectionMap[id] = null;
-          // At this point we know which shadow DOMs are about to be orphaned in
-          // the VM.  What do we do with that information?
+        } else if (saveInfo['shadow']) {
+          // A removed input may have a hidden default beneath a real reporter.
+          // Record its removal too, so undo restores its value before reconnecting
+          // the reporter. It is only DOM at this point, not a workspace block.
+          var hiddenShadow;
+          Blockly.Events.disable();
+          try {
+            hiddenShadow = Blockly.Xml.domToBlock(
+                saveInfo['shadow'].cloneNode(true), this.workspace);
+          } finally {
+            Blockly.Events.enable();
+          }
+          var move = new Blockly.Events.BlockMove(hiddenShadow);
+          move.oldParentId = this.id;
+          move.oldInputName = id;
+          move.oldCoordinate = undefined;
+          move.recordNew();
+          Blockly.Events.fire(move);
+          hiddenShadow.dispose();
+          connectionMap[id] = null;
         }
       }
     }
@@ -465,7 +483,6 @@ Blockly.ScratchBlocks.ProcedureUtils.populateArgumentOnCaller_ = function(type,
     oldBlock.outputConnection.connect(input.connection);
     if (this.generateShadows_) {
       var shadowDom = oldShadow || this.buildShadowDom_(type);
-      console.log("setting shadow dom: " + shadowDom);
       input.connection.setShadowDom(shadowDom);
     }
   } else if (this.generateShadows_) {
